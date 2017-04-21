@@ -1,11 +1,10 @@
 \documentclass[a4paper, 12pt]{article}
-\textheight = 25cm
-\textwidth = 18,5cm
-\topmargin = -2cm
-\oddsidemargin = -1cm
-\parindent = 0mm
+\textwidth 16.5 cm
+\oddsidemargin 0 cm
+\topmargin -1.5 cm
+\textheight 25 cm
 \renewcommand{\baselinestretch}{1.25}
-\markright{Alfredo Ibias Martínez}
+\markright{Alfredo Ibias Martínez y Daniel Loscos Barroso}
 \usepackage{amsmath,amssymb,amsfonts,latexsym,cancel}
 \usepackage[spanish]{babel}
 \usepackage[utf8]{inputenc}
@@ -25,9 +24,10 @@
 \def\min{\mathop{\mbox{\rm m\’in}}}
 
 \begin{document}
-\title{\Huge \bf Especificación del lenguaje Space}
+\title{\Huge \bf Especificación del lenguaje \textit{Space}}
 \author{
 	\small Alfredo Ibias Martínez\\
+	\small Daniel Loscos Barroso\\
     \small Doble Grado Matemáticas - Ingeniería Informática
     }
 \date{}
@@ -44,72 +44,98 @@
 \end{center}
 \newpage
 
-\section{Motivación}
-Para la especificación del lenguaje, y en especial a la hora de escoger los requisitos que va a cumplir, voy a buscar una motivación para crear dicho lenguaje, con el objetivo de justificar las elecciones tomadas a la hora de especificarlo.\\
+\section{Presentación del lenguaje}
 
-La motivación que voy a seguir es la de suponer que el lenguaje que voy a crear es un lenguaje pensado para el uso en misiones espaciales. Es decir, cuyo uso principal será crear los sistemas de control y ejecución de los satélites y naves lanzadas al espacio. Por este motivo, he dedicido llamarlo Space.\\
+Para guiarnos en la especificación del lenguaje y en la elección de los requisitos que queremos que cumpla vamos a emplear la siguiente motivación: Queremos crear un lenguaje pensado para su uso en misiones espaciales. Su utilidad principal será crear los sistemas de control y soporte de los satélites y naves lanzadas al espacio. Por este motivo hemos decidido llamarlo \textit{Space}.\\
 
-Esto supone que este lenguaje debe ser un lenguaje sencillo y ligero, que evite lo más posible la generación de errores, y que esté fuertemente orientado a la ejecución de órdenes de forma secuencial, reduciendo la paralelización al mínimo necesario. Es especialmente importante la minimización de los errores pues estos, por pequeños que sean, pueden llegar a causar pérdidas millonarias, ya que todo el proceso involucrado en la investigación espacial, y en especial en el lanzamiento de aparatos al espacio, es bastante costoso.\\
+Deberá ser un lenguaje sencillo y ligero, que evite lo más posible la generación de errores, y que esté fuertemente orientado a la ejecución de órdenes de forma secuencial. Es especialmente importante la minimización de los errores pues estos, por pequeños que sean, pueden llegar a causar pérdidas millonarias.\\
 
-Por tanto, este lenguaje será un lenguaje imperativo básico. Aparte, será necesario que tenga una sintaxis relativamente conocida, pues la idea es que sea ampliamente aceptado y que su curva de aprendizaje sea la menor posible, para que se pueda empezar a usar rápidamente si ya conoces algún otro lenguaje de programación y que su adopción no suponga un coste extra.\\
-Por lo tanto no va a ser un lenguaje muy original y se podría entender como un lenguaje C restringido/simplificado, cuyo objetivo es evitar la mayor cantidad posible de errores.\\
-
-Es cierto que esto supone que el lenguaje tendrá que funcionar por encuesta más que por callbacks (como se verá más adelante), aumentando su tiempo de respuesta. Pero teniendo en cuenta que el tiempo no suele ser una cuestión crucial en las misiones espaciales (al menos no al límite de las milésimas de segundo), el hecho de que la mayoría de programas en su función main vayan a tener un bucle no debería ser problema (de hecho está pensado para eso).\\
-
-Finalmente, una parte importante de este lenguaje sería un sistema de entrada/salida para poder comunicarse con el resto de sistemas, con ficheros y con los usuarios. Sin embargo, dadas las limitaciones de la práctica y la complejidad que esto añade al lenguaje, en un principio esto no se tendrá en cuenta y se valorará la posibilidad de añadir al final, si hay tiempo, un sistema básico de comunicación mediante consola.
-\newpage
+Por lo tanto, este lenguaje será un lenguaje imperativo básico, con una sintaxis simple y pocas diferencias con \textit{C}, para que se pueda empezar a usar rápidamente si ya se conoce este lenguaje de programación.\\
 
 \section{Requisitos del lenguaje}
 El lenguaje cumplirá los siguientes requisitos:
 \subsection{Identificadores y ámbitos de definición}
-A este respecto, el lenguaje permitirá la declaración de variables simples y de arrays de cualquier tipo, incluidos arrays de varias dimensiones (que son equivalentes a los arrays de arrays).\\
+El lenguaje permitirá la declaración de variables simples y de arrays de cualquier tipo, incluidos arrays de arrays. Permitirá también bloques anidados (con su tabla de símbolos correspondiente) y permitirá crear funciones y procedimientos para simplificar y mejorar la legibilidad de los programas.\\
 
-Permitirá también bloques anidados (con su tabla de símbolos correspondiente), y permitirá funciones y procedimientos para simplificar y mejorar la legibilidad de los programas.\\
-
-No permitirá punteros ni registros, para no permitir el acceso a la memoria dinámica ni las referencias a memoria, y por tanto el posible acceso por algún error a otras partes de la memoria que sean fundamentales. Esto es especialmente importante cuando se sabe que los registros o la memoria pueden ser modificados por la interacción con cualquier elemento externo que los dañe o modifique.\\
-
-Tampoco permitirá clases, módulos ni cláusulas de importación para evitar errores derivados de la programación modular, y para simplificar los programas al evitar el uso de bibliotecas generales que contienen más código que el que se va a usar realmente. Si se quiere usar alguna función de biblioteca, esta deberá ser copiada y pegada directamente en el código del programa.
+No incluirá punteros ni registros para no permitir el acceso a la memoria dinámica ni las referencias a memoria. El objetivo es evitar errores que pongan en peligro la integridad de partes sensibles de la memoria. Tampoco permitirá clases, módulos ni cláusulas de importación para evitar errores derivados de la programación modular y para simplificar los programas. Si se quiere usar alguna función de biblioteca, esta deberá ser copiada y pegada directamente en el código del programa.
 \subsection{Tipos}
-A este respecto se tendrá declaración explícita del tipo de las variables, y se tendrán tipos predefinidos (integer, float, boolean, character, string y void).\\
+Se tendrá declaración explícita del tipo de las variables y los tipos predefinidos (integer, real, boolean, character, Numeric y Type).\\
 
-Se tendrán también operadores infijos, con distintas prioridades y asociatividades, para realizar operaciones con los distintos tipos.\\
+El lenguaje contendrá operadores infijos, con distintas prioridades y asociatividades, para realizar operaciones con los distintos tipos. Se podrá tener también tipos sin nombre y se podrán definir tipos de usuario de forma limitada (en concreto, sólo enumerados).\\
 
-Se podrán tener también tipos sin nombre y con nombre, y se podrán definir tipos de usuario de forma limitada (en concreto, sólo enumerados, es decir, realmente no se podrán definir nuevos tipos).\\
-
-Finalmente, la equivalencia de tipos será por nombres, para evitar problemas derivados de tener dos tipos con la misma definición pero distinto nombre.
-\newpage
+La equivalencia de tipos será por nombres, para evitar problemas.
 
 \subsection{Instrucciones ejecutables}
-A este respecto es tendrán instrucciones de:
+\textit{Space} Tendrá instrucciones de: 
 \begin{itemize}
-\item Asignación, incluyendo arrays. Se usará para ello el símbolo = infijo.
-\item Condicional con una y dos ramas. Se usará para ello la estructura if/else.
-\item Bucle. Se tendrá tanto el típico bucle while como los bucles for y do/while.
+\item Asignación, incluyendo arrays. 
+\item Condicional con una y dos ramas.
+\item Bucle. Se tendrá el típico bucle while.
 \item Instrucción case con salto a cada rama en tiempo constante.
-\item Expresiones formadas por constantes, identificadores con y sin subíndice, y por operadores infijos.
+\item Expresiones formadas por constantes, identificadores (con y sin subíndice) y operadores infijos.
 \item Llamadas a procedimientos y funciones.
 \end{itemize}
+
 Lo que no se tendrá serán expresiones con punteros y nombres cualificados, ni instrucciones de reserva o liberación de memoria dinámica para evitar los problemas con punteros y memoria dinámica señalados anteriormente.
 \subsection{Errores}
-A este respecto, el compilador indicará el tipo de error, y las fila y columna donde se ha producido, e intentará proseguir con la compilación tras detectar un error para detectar más errores.
+El compilador indicará el tipo de error, y las fila y columna donde se ha producido. Acto seguido parará la compilación.
 \newpage
 
 \section{Sintaxis}
 La sintaxis del lenguaje se define a continuación:
+\subsection{Unidades Léxicas}
+Estas son las unidades léxicas que hemos contemplado:
+\begin{align*}
+%Vale, todo esto sale en cursiva, podemos ahorrarnos miles de  \textit
+&letraMin = \textrm{a|...|z}\\
+&letraMay = \textrm{A|...|Z}\\
+&letra =letraMay|letraMin\\
+&digitoPos = \textrm{1|...|9}\\
+&digito = digitoPos|\textrm{0}\\
+&parteEnt = digitoPos(digito)^*\\
+&parteDec = (digito)^*digitoPos\\
+&int =parteEnt|\textrm{0}\\
+&real =int|(int).parteDec\\
+&separador=\textrm{\textbackslash t|\textbackslash  n}\\
+&simbolo= +|-|=|>|\%|...|\textbackslash|.|,|;\\
+&comentario=\textbackslash \textbackslash (letra|digito|\textbackslash \textrm{t}|simbolo)^* \textbackslash \textrm{n}\\
+&identificadorVar =letraMin(digito|letra|\_)^*([parteEnt|\textrm{0}])^*\\
+&char =\ \textrm{'}(letra|digito|simbolo|separador)\textrm{'}\\
+&num =int|real\\
+&bool =true|false\\
+&type =num|char|bool\\
+&argumento =type|identificadorVar\\
+&identificadorFun =letraMay(digito|letra|\_)^*((\varepsilon|(argumento(,argumento)^*))\\
+&identificador =identificadorVar|identificadorFun\\
+&palabrasReservadas= \textrm{while|if|else|...|float|bool|int|...|return|DEFINE|DECLARE|START|END}\\
+\end{align*}
+
 \subsection{Generalidades}
-Todo programa empieza en la función main, que será una función que devuelve un entero, a imagen de las funciones main de la mayoría de lenguajes conocidos.\\
-Los paréntesis (elementos ''('' y '')'' ) modifican la asociación de los operandos.\\
-Los números se escriben tal cual en el código, pero los carácteres deben ir entre comillas simples y las cadenas de carácteres entre comillas dobles.
+Todo programa empieza en START y ejecuta las instrucciones que encuentra hasta llegar a END. Sin embargo el código no empieza ahí, tendremos tres secciones de código:
+\begin{itemize}
+\item DECLARE: Es el primer bloque de código, en él se declaran las variables globales, las funciones y los procedimientos.
+\item DEFINE: Es la sección del código donde se definen las funciones y procedimientos que se usarán en MAIN.
+\item MAIN: Empieza por START y acaba en END, es el bloque que contiene las instrucciones que van a ejecutarse y cierra el código.
+\end{itemize}
+De este modo, un archivo, punto de entrada a la gramática, tendría esta forma:
+\begin{align*}
+&ARCHIVO \rightarrow DECLARE\quad DEFINE\quad MAIN\\
+\end{align*}
 \subsection{Cierre de expresiones y bloques}
 Las expresiones se acaban con '';'' para determinar donde acaba la expresión. Alternativamente, el final de un bloque lleva implícito el '';''.\\
+
 Los bloques están delimitados por llaves ( elementos ''\{'' y ''\}''\ ) y se permite que estén anidados.\\
+
 Para evitar errores, este lenguaje no permitirá que los '';'' y las llaves ''\{'' y ''\}'' estén en una linea distinta a la que deberían estar. Luego, si se detecta un salto de linea cuando debería haber uno de estos símbolos, saltará un error y no compilará, aunque éste esté en la linea siguiente. Esto conlleva que no se permiten las instrucciones multilineas para mejorar la claridad del código, sino que se deberá poner todo en la misma línea.
 \subsection{Comentarios}
-Los comentarios pueden ser de una linea (empiezan con ''//'' y llegan hasta el final de línea) o de varias líneas (empiezan con ''/*'' y acaban con ''*/''\ ) y se permite anidación de comentarios.
+Los comentarios sólo pueden ser de una linea: empiezan con ''//'' y llegan hasta el final de línea.
 \subsection{Declaración de variables y constantes}
 Las variables se declaran poniendo el tipo de la variable seguido del identificador de la misma.\\
+
 Los identificadores de variables y funciones empiezan siempre por letra, ya sea mayúscula o minúscula.\\
+
 Los arrays se indican en la declaración de la variable poniendo después del tipo ''[longitud]'', donde ''longitud'' debe de ser un número. Al usarlos en expresiones, se debe incluir después del identificador de la variable, entre corchetes, el índice que se está usando del array. Para referirse al array entero (por ejemplo en un paso de parametros a una función) se usa el identificador de la variable sin los corchetes.\\
+
 Un array de varias dimensiones lo que tiene son varios corchetes, uno por dimensión, después del identificador de variable (o del tipo cuando se declara la variable).\\
 Finalmente, se pueden declarar constantes añadiendo a la declaración de tipos la palabra ''const'' justo antes del tipo.
 \subsection{Expresiones}
@@ -140,6 +166,7 @@ Las expresiones podrán contener:
 \item Asignaciones: usando =\ (infijo).
 \item Asignaciones compuestas: usando op=\ (infijo) donde op es una operación aplicable al tipo de la asignación.
 \end{itemize}
+
 Todas estas expresiones funcionan en resumen como lo hacen en cualquier otro lenguaje como C o Java.
 \newpage
 
@@ -199,6 +226,7 @@ Los tipos predefinidos son:
 \item Tipo cadena de carácteres: string.
 \item Tipo vacío: void.
 \end{itemize}
+
 Para que un usuario defina sus propios tipos sólo se permite la creación de enumerados, con la siguiente estructura:\\
 
 enum nombreDelEnumerado \{ \\
