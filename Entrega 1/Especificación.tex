@@ -1,0 +1,282 @@
+\documentclass[a4paper, 12pt]{article}
+\textwidth 16.5 cm
+\oddsidemargin 0 cm
+\topmargin -1.5 cm
+\textheight 25 cm
+\renewcommand{\baselinestretch}{1.25}
+\markright{Alfredo Ibias Martínez y Daniel Loscos Barroso}
+\usepackage{amsmath,amssymb,amsfonts,latexsym,cancel}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{makeidx}
+\usepackage{float}
+\usepackage{color}
+\usepackage{multicol}
+\makeindex
+\newcommand{\sen}{\mathop{\rm sen}\nolimits}
+\newcommand{\arcsen}{\mathop{\rm arcsen}\nolimits}
+\newcommand{\arcsec}{\mathop{\rm arcsec}\nolimits}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\def\max{\mathop{\mbox{\rm m\’ax}}}
+\def\min{\mathop{\mbox{\rm m\’in}}}
+
+\begin{document}
+\title{\Huge \bf Especificación del lenguaje \textit{Space}}
+\author{
+	\small Alfredo Ibias Martínez\\
+	\small Daniel Loscos Barroso\\
+    \small Doble Grado Matemáticas - Ingeniería Informática
+    }
+\date{}
+\maketitle
+
+\section{Presentación del lenguaje}
+Para guiarnos en la especificación del lenguaje y en la elección de los requisitos que queremos que cumpla vamos a emplear la siguiente motivación: Queremos crear un lenguaje pensado para su uso en misiones espaciales. Su utilidad principal será crear los sistemas de control y soporte de los satélites y naves lanzadas al espacio. Por este motivo hemos decidido llamarlo \textit{Space}.\\
+
+Deberá ser un lenguaje sencillo y ligero, que evite lo más posible la generación de errores, y que esté fuertemente orientado a la ejecución de órdenes de forma secuencial. Es especialmente importante la minimización de los errores pues estos, por pequeños que sean, pueden llegar a causar pérdidas millonarias.\\
+
+Por lo tanto, este lenguaje será un lenguaje imperativo básico, con una sintaxis simple y pocas diferencias con \textit{C}, para que se pueda empezar a usar rápidamente si ya se conoce este lenguaje de programación.
+
+\section{Requisitos del lenguaje}
+El lenguaje cumplirá los siguientes requisitos:
+
+\subsection{Identificadores y ámbitos de definición}
+El lenguaje permitirá la declaración de variables simples y de arrays de cualquier tipo, incluidos arrays de arrays. Permitirá también bloques anidados (con su tabla de símbolos correspondiente) y permitirá crear funciones y procedimientos para simplificar y mejorar la legibilidad de los programas.\\
+
+No incluirá punteros ni registros para no permitir el acceso a la memoria dinámica ni las referencias a memoria. El objetivo es evitar errores que pongan en peligro la integridad de partes sensibles de la memoria. Tampoco permitirá clases, módulos ni cláusulas de importación para evitar errores derivados de la programación modular y para simplificar los programas. Si se quiere usar alguna función de biblioteca, esta deberá ser copiada y pegada directamente en el código del programa.
+
+\subsection{Tipos}
+Se tendrá declaración explícita del tipo de las variables y los tipos predefinidos: int, float, bool y char. Así como los tipos sin nombre formados por arrays pluridimensionales de estos tipos básicos.\\
+
+El lenguaje contendrá operadores infijos, con distintas prioridades y asociatividades, para realizar operaciones con los distintos tipos básicos.
+
+\subsection{Instrucciones ejecutables}
+\textit{Space} tendrá instrucciones de:
+\begin{itemize}
+\item Declaración de variable.
+\item Asignación, incluyendo arrays.
+\item Condicional con una y dos ramas.
+\item Bucle. Se tendrá el típico bucle while.
+\item Instrucción case con salto a cada rama en tiempo constante.
+\item Llamadas a procedimientos y funciones.
+\end{itemize}
+Lo que no se tendrá serán expresiones con punteros y nombres cualificados, ni instrucciones de reserva o liberación de memoria dinámica para evitar los problemas con punteros y memoria dinámica señalados anteriormente.
+
+\subsection{Errores}
+El compilador indicará el tipo de error y acto seguido parará la compilación.
+\newpage
+
+\section{Sintaxis}
+La sintaxis del lenguaje se define a continuación:
+
+\subsection{Unidades Léxicas}
+Estas son las unidades léxicas que hemos contemplado:
+\begin{align*}
+&simbolo = (+|-|*|/|=|>|<|>=|<=|==|!=|\wedge|\%|\&\&|"||"|~\\
+&|(|)|\{\textbackslash  n|\{|\}\textbackslash  n|\}|;\textbackslash  n|;|,\textbackslash  n|,|[|]|:\textbackslash  n|:)\\
+&letraMin = [a-z]\\
+&letraMay = [A-Z]\\
+&letra  = (\{letraMin\}|\{letraMay\})\\
+&digitoPositivo = [1-9]\\
+&digito = (\{digitoPositivo\}|0)\\
+&parteEnt = \{digitoPositivo\}\{digito\}*\\
+&parteDec = \{digito\}*\{digitoPositivo\}\\
+&int = (\{parteEnt\}|0)\\
+&real = (\{int\}|\{int\}.\{parteDec\})\\
+&char = '(\{letra\}|\{digito\}|\{simbolo\}|\{separador\}|\textbackslash  n)'\\
+&bool = (true|false)\\
+&palabrasReservadas = (DECLARE\textbackslash  n|proc|bool|char|int|float\\
+&|DEFINE\textbackslash  n|return|START\textbackslash  n|END|if|else|while|switch|case|default)\\
+&separador = [\ \textbackslash  t\textbackslash  r]\\
+&saltodelinea = [\textbackslash  n]\\
+&comentario = //(\{letra\}|\{digito\}|\{simbolo\}|\{separador\}|.)*\{saltodelinea\}\\
+&idVar = \{letraMin\}(\{digito\}|\{letra\}|_)*\\
+&idFun = \{letraMay\}(\{digito\}|\{letra\}|_)*\\
+\end{align*}
+
+\subsection{Generalidades}
+Todo programa empieza en START y ejecuta las instrucciones que encuentra hasta llegar a END. Sin embargo el código no empieza ahí, tendremos tres secciones de código:
+\begin{itemize}
+\item DECLARE: Es el primer bloque de código, en él se declaran las funciones y los procedimientos.
+\item DEFINE: Es la sección del código donde se definen las funciones y procedimientos que se usarán en MAIN.
+\item MAIN: Empieza por START y acaba en END, es el bloque que contiene las instrucciones que van a ejecutarse, incluyendo la declaración de variables. La palabra reservada END cierra el código.
+\end{itemize}
+De este modo, un archivo, punto de entrada a la gramática, tendría esta forma:
+\begin{align*}
+&ARCHIVO \rightarrow DECLARE\quad DEFINE\quad MAIN
+\end{align*}
+
+\subsection{Cierre de expresiones y bloques}
+La mayoría de las instrucciones acaban con ``;'', salvo las de control.\\
+Tendremos distinto tipos de bloques:
+\begin{itemize}
+\item Los bloques de instrucciones están delimitados por llaves ( elementos ``\{'' y ``\}''\ ) y se permite que estén anidados de forma que las variables declaradas en un bloque no afectan al bloque que las contiene, pero si se modifica una variable que ya existía, la modificación afecta al bloque padre. Las instrucciones que generan nuevos bloques de instucciones son las de control.
+\begin{align*}
+&BLOQUEI \rightarrow \textrm{\{}\quad INSTRUCCIONES \quad \textrm{\}}\\
+&INSTRUCCIONES \rightarrow INSTRUCCION \textbackslash \textrm{n} \quad INSTRUCCIONES|  \varepsilon\\
+&INSTRUCCION \rightarrow DECVAR | ASIG | IF| IFELSE | WHILE | SWITCH | PROC
+\end{align*}
+\item El bloque de declaración de funciones y procedimientos empezará por DECLARE y contendrá únicamente las cabeceras. Los identificadores de funciones y procedimientos (\textit{IDFP}) empezarán por mayúscula y contendrán solo letras, dígitos o el carácter \_.
+\begin{align*}
+&DECLARE \rightarrow \textrm{DECLARE\textbackslash \textrm{n}}\quad CABECERAS\\
+&CABECERAS \rightarrow CABECERA \textbackslash \textrm{n} \quad CABECERAS|  \textbackslash \textrm{n}\\
+&CABECERA \rightarrow CABECERAF  |CABECERAP \\
+&CABECERAF \rightarrow TIPO\quad IDFP\quad  \textbf{(} TARGS \textbf{)}\textrm{;}\\
+&CABECERAP \rightarrow \textrm{proc}\quad IDFP\quad  \textbf{(} TARGS \textbf{)}\textrm{;} \\
+&TIPO \rightarrow  \textrm{bool}|\textrm{char}|\textrm{int}|\textrm{float}\\
+&TARGS \rightarrow TIPO|  TIPO \textrm{,} \quad TARGS
+\end{align*}
+\item El bloque de definición de funciones y procedimientos empezará por DEFINE y contendrá los bloques de implementación de funciones y de procedimientos:
+\begin{align*}
+&DEFINE \rightarrow \textrm{DEFINE\textbackslash \textrm{n}}\quad IMPLEMENTACIONES\\
+&IMPLEMENTACIONES \rightarrow IMPLEMENTA \textbackslash \textrm{n} \quad IMPLEMENTACIONES|  \textbackslash \textrm{n}\\
+&IMPLEMENTA \rightarrow IMPLEMENTAF  |IMPLEMENTAP
+\end{align*}
+\item Los implementación de funciones:
+\begin{align*}
+&IMPLEMENTAF \rightarrow  IDFP\quad  \textbf{(} ARGS \textbf{)}\textrm{\{} INSTRUCCIONES \quad RETURN \textrm{\}}\\
+&ARGS \rightarrow ID|  ID \textrm{,} \quad ARGS\\
+&RETURN \rightarrow  \textrm{return} \quad EXPRESION\textrm{;}
+\end{align*}
+\item Los implementación de procedimientos:
+\begin{align*}
+&IMPLEMENTAP \rightarrow  IDFP\quad  \textbf{(} ARGS \textbf{)}BLOQUEI
+\end{align*}
+\item Finalmente, el bloque principal de ejecución:
+\begin{align*}
+&MAIN \rightarrow  \textrm{START\textbackslash \textrm{n}}\quad  INSTRUCCIONES \quad \textrm{END}
+\end{align*}
+\end{itemize}
+
+\subsection{Expresiones}
+Las expresiones podrán contener:
+\begin{itemize}
+\item Identificadores de variable: \textit{ID}
+\item Llamadas a función: \textit{IDFP \textrm{(}ARGS\textrm{)}}  nombreFunción(var1, var2, ..., varN)
+\item Numeros, booleanos o caracteres: \textit{ELEM}
+\item Operadores:
+	\begin{itemize}
+	\item Suma: +\ (infijo, entre dos ints o floats, 1).
+	\item Resta: -\ (infijo, entre dos ints o floats, 1).
+	\item Menos: -\ (prefijo a un int o float, 4).
+	\item Multiplicación: *\ (infijo, entre dos ints o floats, 2).
+	\item División: /\ (infijo, entre dos ints o floats, 2).
+	\item Módulo: \% (infijo, entre dos ints, 2).
+	\item Potencia: $\wedge$\ (infijo, entre dos ints o floats, 3).
+	\end{itemize}
+\item Comparadores:
+	\begin{itemize}
+	\item Comparación de igualdad: ==\ (infijo, entre dos tipos iguales, 0).
+	\item Comparación de desigualdad: !=\ (infijo, entre dos tipos iguales, 0).
+	\item Comparación de menor o igual: <=\ (infijo, entre dos ints, floats o chars, 0).
+	\item Comparación de mayor o igual: >=\ (infijo, entre dos ints, floats o chars, 0).
+	\item Comparación de menor: <\ (infijo, entre dos ints o floats, 0).
+	\item Comparación de mayor: >\ (infijo, entre dos ints o floats, 0).
+	\item AND lógico: \&\&\ (infijo, entre dos tipos booleanos, 2).
+	\item OR lógico: ||\ (infijo, entre dos tipos booleanos, 1).
+	\item NOT lógico: $\sim$ \ (prefijo a un tipo  booleano, 4).
+	\end{itemize}
+	
+	Las expresiones de módulo y potencia son nativas a nuestro lenguaje. Modificaremos la máquina-P para que las soporte.
+	
+\end{itemize}
+\begin{align*}
+&EXP \rightarrow E1\quad OP0\quad  EXP | E1\\
+&E1 \rightarrow E2\quad  OP1\quad  E1 | E2\\
+&E2 \rightarrow E3\quad  OP2\quad  E2 | E3\\
+&E3 \rightarrow E4\quad  OP3\quad  E3 | E4\\
+&E4 \rightarrow OP4\quad  E4 | E5\\
+&E5 \rightarrow ID|IDFP \textrm{(}ARGS\textrm{)}|ELEM|\textbf{(}EXP\textbf{)}\\
+&OP0 \rightarrow ==|!=|<=|>=|<|>\\
+&OP1 \rightarrow +|-|\ ||\\
+&OP2 \rightarrow *|/|\%| \&\&\\
+&OP3 \rightarrow \wedge\\
+&OP4 \rightarrow -|\sim
+\end{align*}
+
+\subsection{Declaración de variables}
+Las variables de tipos básicos se declaran poniendo el tipo de la variable seguido del identificador de la misma.\\
+
+Los identificadores empiezan siempre con minúscula. Los arrays se indican en la declaración de la variable añadiéndoles, después del tipo, un subíndice que indica su longitud (número entero entre corchetes ''['' y '']''). Al usarlos en expresiones, se debe incluir después del identificador de la variable, el subíndice concreto que se está usando del array. Para referirse al array entero (por ejemplo en un paso de parametros a una función) se usa el identificador de la variable sin los corchetes. En uso todos los arrays tiene como indice mínimo 0 y como máximo su dimensión menos uno.
+\begin{align*}
+&DECVAR \rightarrow  TVAR | SVAR\\
+&TVAR \rightarrow  TIPO \quad DIMS \quad ID \textrm{;}\\
+&DIMS \rightarrow DIM | DIM \quad DIMS\\
+&DIM \rightarrow \textrm{[} EXP \textrm{]}|\varepsilon
+\end{align*}
+
+\subsection{Asignación}
+La asignación de variables se hace con su identificador, el símbolo = y la expresión que queremos asignarle.
+\begin{align*}
+&ASIG \rightarrow ID \quad  =\quad EXP \textrm{;}
+\end{align*}
+
+En ningún caso se admitirá la asignación en el mismo momento de la declaración de una variable.
+
+\subsection{Instrucciones de control}
+Las instrucciones de control habilitadas son:
+\begin{itemize}
+\item Condicional con una rama. Su estructura es:\\
+\null\quad\quad if (condición) \{ \\
+\null\quad\quad\quad\quad // Rama 1.\\
+\null\quad\quad \}
+\begin{align*}
+&IF \rightarrow \textrm{if(}EXP\textrm{)} \quad  BLOQUEI
+\end{align*}
+\item Condicional con dos ramas. Su estructura es:\\
+\null\quad\quad if (condición) \{ \\
+\null\quad\quad\quad\quad // Rama 1.\\
+\null\quad\quad \} else \{ \\
+\null\quad\quad\quad\quad // Rama 2.\\
+\null\quad\quad \}
+\begin{align*}
+&IFELSE \rightarrow IF\quad \textrm{else} \quad  BLOQUEI
+\end{align*}
+\item Bucle While. Su estructura es:\\
+\null\quad\quad while (condición) \{ \\
+\null\quad\quad\quad\quad // Contenido del bucle.\\
+\null\quad\quad \}
+\begin{align*}
+&WHILE \rightarrow \textrm{while(}EXP\textrm{)} \quad  BLOQUEI
+\end{align*}
+\newpage
+
+\item Condicional Case. Su estructura es:\\
+\null\quad\quad switch EXP\\
+\null\quad\quad case INDICE: \{ \\
+\null\quad\quad\quad\quad // Rama1.\\
+\null\quad\quad \}\\
+\null\quad\quad\quad\quad \vdots\\
+\null\quad\quad default: \{ \\
+\null\quad\quad\quad\quad // Rama por defecto (puede estar vacía).\\
+\null\quad\quad \}
+
+Los indices de los cases empezarán siempre en 1 y serán enteros consecutivos.
+
+\begin{align*}
+&SWITCH \rightarrow \textrm{switch(}EXP\textrm{)}\quad CASES \quad \textrm{default:}\quad BLOQUEI\\
+&CASES \rightarrow \textrm{case}\ EXP\textrm{:}\quad BLOQUEI \quad CASES | \varepsilon
+\end{align*}
+\end{itemize}
+
+\subsection{Llamadas a procedimientos}
+Los procedimientos se llaman directamente con su identificador y los parámetros:  nombreProc(var1, var2, ..., varN);
+\begin{align*}
+&PROC \rightarrow IDFP \textrm{(}ARGS\textrm{);}
+\end{align*}
+
+Tanto para procedimientos como para funciones, todos los argumentos se pasan por valor.
+
+\section{La máquina-PSpace}
+
+El lenguaje \textit{Space} esta pensado para compilarse y generar código-PSpace. Es muy parecido al código-P de la máquina-P pero con una ligera modificación:
+
+La máquina-PSpace admite como nativas las instrucciones de potencia y módulo. Construimos la máquina-PSpace modificando el código de la máquina-P aportada por el profesor para añadirle estas operaciones.
+
+La máquina-PSpaces solo trabaja con tipos de datos enteros y booleanos. Los tipos float y char se convierten en enteros por truncamiento o indice ascii para poder procesarse.
+
+\end{document}

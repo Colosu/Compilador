@@ -1,0 +1,12 @@
+DECLARE
+
+
+DEFINE
+
+
+START
+
+float i5;
+i5 = (5.56 + 0.86) * 2.25 / 2.58;
+
+END

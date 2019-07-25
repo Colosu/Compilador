@@ -1,0 +1,12 @@
+DECLARE
+
+
+DEFINE
+
+
+START
+
+float i5;
+i5 = (5.0 + 0.86) * 'a' / 2.58;
+
+END

@@ -1,0 +1,16 @@
+DECLARE
+
+DEFINE
+
+
+START
+if (true){
+    int var;
+    var = 0;
+}
+int var;
+var = 1;
+if (true){
+    var = 2;
+}
+END

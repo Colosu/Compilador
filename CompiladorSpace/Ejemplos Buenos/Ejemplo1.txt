@@ -1,0 +1,24 @@
+DECLARE
+int Suma (int [2] [2] [2]);
+
+DEFINE
+Suma (a){
+	int[1] as;
+	as[0] = a[0][0][0] + a[0][0][1] + a[0][1][0] + a[0][1][1] + a[1][0][0] + a[1][0][1] + a[1][1][0] + a[1][1][1];
+	return as[0];
+}
+
+START
+		int [2] [2] [2] array;
+		array[0][0][0] = 0;
+		array[0][0][1] = 1;
+		array[0][1][0] = 2;
+		array[0][1+0][1] = 3;
+		array[1][0][0] = 4;
+		array[1][0][1] = 5;
+		array[1][1][0] = 6;
+		array[1][1+0][1] = 7;
+		int suma;
+		suma = Suma(array);
+
+END

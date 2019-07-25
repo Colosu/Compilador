@@ -1,0 +1,19 @@
+DECLARE
+
+bool Impar (int);
+
+DEFINE
+
+Impar (a){
+	bool sol;
+	sol = ((a % 2) != 0);
+	return sol;
+}
+
+START
+int indice;
+indice = 2;
+if(~Impar(indice)) {
+    indice = 3;
+}
+END

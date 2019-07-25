@@ -1,0 +1,16 @@
+{0}ssp 6;
+{1}ldc 5;
+{2}ldc false;
+{3}sto;
+{4}mst 0;
+{5}ldc 1;
+{6}ldc 5;
+{7}ind;
+{8}ldc 4;
+{9}cup 3 11;
+{10}stp;
+{11}ssp 8;
+{12}lda 0 6;
+{13}ldc true;
+{14}sto;
+{15}retp;

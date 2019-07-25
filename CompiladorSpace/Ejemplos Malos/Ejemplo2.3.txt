@@ -1,0 +1,46 @@
+DECLARE
+
+int Fact(int[2]);
+int FactImpar(int[2]);
+
+DEFINE
+
+Fact(a) {
+	int resultado;
+	if (a[1] > 1) {
+		a[1] = a[1] - 1;
+		int aux;
+		aux = a[0];
+		a[0] = a[0] - 1;
+		a[0] = aux * Fact(a);
+		resultado = a[0];
+	} else {
+		resultado = a[0];
+	}
+	return resultado;
+}
+
+Fact(a) {
+	int resultado;
+	if (a[1] > 1) {
+		a[1] = a[1] - 1;
+		int aux;
+		aux = a[0];
+		a[0] = a[0] - 1;
+		a[0] = aux * Fact(a);
+		resultado = a[0];
+	} else {
+		resultado = a[0];
+	}
+	return resultado;
+}
+
+START
+
+int [2][2] b;
+b[1][0]= 4;
+b[1][1]= 4;
+int sol;
+sol = Fact(b[1]);
+
+END

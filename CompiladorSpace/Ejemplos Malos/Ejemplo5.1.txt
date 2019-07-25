@@ -1,0 +1,17 @@
+DECLARE
+
+proc EscribeBool (int, bool, char);
+
+DEFINE
+
+EscribeBool (contador, sino, aux, vi){
+	sino = true;
+}
+
+START
+
+bool f;
+f = false;
+EscribeBool(1,f,'d');
+
+END

@@ -1,0 +1,15 @@
+{0}ssp 6;
+{1}ldc true;
+{2}fjp 6;
+{3}ldc 5;
+{4}ldc 0;
+{5}sto;
+{6}ldc 5;
+{7}ldc 1;
+{8}sto;
+{9}ldc true;
+{10}fjp 14;
+{11}ldc 5;
+{12}ldc 2;
+{13}sto;
+{14}stp;

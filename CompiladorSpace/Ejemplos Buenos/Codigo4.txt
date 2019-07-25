@@ -1,0 +1,11 @@
+{0}ssp 6;
+{1}ldc 5;
+{2}ldc 5;
+{3}ldc 0;
+{4}add;
+{5}ldc 2;
+{6}ldc 2;
+{7}div;
+{8}mul;
+{9}sto;
+{10}stp;

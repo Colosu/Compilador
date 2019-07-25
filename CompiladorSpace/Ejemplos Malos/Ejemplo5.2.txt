@@ -1,0 +1,18 @@
+DECLARE
+
+bool EscribeBool (int, bool, char);
+
+DEFINE
+
+EscribeBool (contador, sino, aux){
+	sino = true;
+    return sino;
+}
+
+START
+
+bool f;
+f = false;
+EscribeBool(1,f,'d');
+
+END

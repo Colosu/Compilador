@@ -1,0 +1,250 @@
+package asint;
+
+import java_cup.runtime.*;
+import parsers.ParserId;
+import alex.AnalizadorLexicoTiny;
+import alex.UnidadLexica;
+import alex.Token;
+import errors.GestionErroresTiny;
+import tree.*;
+import tree.estructuras.*;
+import tree.expresiones.*;
+import tree.instrucciones.*;
+import tree.variables.*;
+
+scan with {: return getScanner().next_token(); :};
+parser code {:
+	public void syntax_error(Symbol unidadLexica) {
+		errores.errorSintactico((UnidadLexica)unidadLexica);
+	}
+
+	private GestionErroresTiny errores;
+:};
+init with {: 
+   errores = new GestionErroresTiny();
+   AnalizadorLexicoTiny alex = (AnalizadorLexicoTiny)getScanner();
+   alex.fijaGestionErrores(errores);
+:};
+
+terminal Token DECLARE, DEFINE, START, END, LLAVEAPERTURA, LLAVECIERRE, PARENTESISAPERTURA, PARENTESISCIERRE, PUNTOCOMA, COMA,
+				PROC, BOOL, CHAR, INT, REAL, RETURN, EQ, NEQ, LET, GET, LT, GT, MAS, MENOS, OR, POR, DIV, MOD, AND, POW, NOT,
+				CORCHETEAPERTURA, CORCHETECIERRE, IGUAL, IF, ELSE, WHILE, SWITCH, CASE, DEFAULT, DOSPUNTOS, ID, IDFP,
+				BOOLELEMENT, CHARELEMENT, INTELEMENT, REALELEMENT;
+
+non terminal NodoArchivo ARCHIVO;
+non terminal NodoDeclare BDECLARE;
+non terminal NodoDefine BDEFINE;
+non terminal NodoBloque BMAIN, BLOQUEI;
+non terminal NodoBloqueReturn BLOQUER;
+non terminal NodoInstruccion INSTRUCCIONES, INSTRUCCION, DECVAR, ASIG, BIFELSE, BWHILE, BSWITCH, LLPROC, TVAR;
+non terminal NodoIf BIF;
+non terminal NodoReturn BRETURN;
+non terminal NodoCabecera CABECERAS, CABECERA, CABECERAF, CABECERAP;
+non terminal String TIPO;
+non terminal NodoInsertaTipoArg TARGS;
+non terminal NodoImplementacion IMPLEMENTACIONES, IMPLEMENTA, IMPLEMENTAF, IMPLEMENTAP;
+non terminal NodoInsertaNombreArg ARGS;
+non terminal NodoExpresion EXP;
+non terminal NodoExp1 E1;
+non terminal NodoExp2 E2;
+non terminal NodoExp3 E3;
+non terminal NodoExp4 E4;
+non terminal NodoExp5 E5;
+non terminal NodoElem ELEM;
+non terminal NodoOp0 OP0;
+non terminal NodoOp1 OP1;
+non terminal NodoOp2 OP2;
+non terminal NodoOp3 OP3;
+non terminal NodoOp4 OP4;
+non terminal NodoIdVar IDVAR;
+non terminal NodoDecDim DECDIMS, DECDIM;
+non terminal NodoDim DIMS, DIM;
+non terminal NodoCase CASES;
+non terminal NodoArgumento ARGSLLAMADA;
+
+start with ARCHIVO;
+
+ARCHIVO ::= BDECLARE:n1 BDEFINE:n2 BMAIN:n3 {: RESULT = new NodoArchivo(n1, n2, n3); ParserId.diTree(RESULT); :};
+
+BLOQUEI ::= LLAVEAPERTURA:t1 INSTRUCCIONES:n LLAVECIERRE:t2 {: RESULT = new NodoBloque(n); :}
+		| LLAVEAPERTURA:t1 LLAVECIERRE:t2 {: RESULT = new NodoBloque(null); :};
+		
+BLOQUER ::= LLAVEAPERTURA:t1 INSTRUCCIONES:n1 BRETURN:n2 LLAVECIERRE:t2 {: RESULT = new NodoBloqueReturn(n1, n2); :}
+		| LLAVEAPERTURA:t1 BRETURN:n LLAVECIERRE:t2 {: RESULT = new NodoBloqueReturn(null, n); :};
+		
+INSTRUCCIONES ::= 
+		INSTRUCCION:n1 INSTRUCCIONES:n2 {: n1.setSiguiente(n2); RESULT = n1; :}
+		| INSTRUCCION:n {: RESULT = n; :};
+		
+INSTRUCCION ::= 
+		DECVAR:n {: RESULT = n; :}
+		| ASIG:n {: RESULT = n; :}
+		| BIF:n {: RESULT = n; :}
+		| BIFELSE:n {: RESULT = n; :}
+		| BWHILE:n {: RESULT = n; :}
+		| BSWITCH:n {: RESULT = n; :}
+		| LLPROC:n {: RESULT = n; :};
+
+BDECLARE ::= DECLARE:t CABECERAS:n {: RESULT = new NodoDeclare(n); :}
+		| DECLARE:t {: RESULT = new NodoDeclare(null); :};
+		
+CABECERAS ::= 
+		CABECERA:n1 CABECERAS:n2 {: n1.setSiguiente(n2); RESULT = n1; :}
+		| CABECERA:n {: RESULT = n; :};
+		
+CABECERA ::= 
+		CABECERAF:n {: RESULT = n; :}
+		| CABECERAP:n {: RESULT = n; :};
+		
+CABECERAF ::= 
+		TIPO:n1 IDFP:t1 PARENTESISAPERTURA:t2 TARGS:n2 PARENTESISCIERRE:t3 PUNTOCOMA:t4 {: RESULT = new NodoCabecera(t1.lexema(), t1.fila(), t1.columna(), n1, null, n2); :}
+		| TIPO:n1 IDFP:t1 PARENTESISAPERTURA:t2 PARENTESISCIERRE:t3 PUNTOCOMA:t4 {: RESULT = new NodoCabecera(t1.lexema(), t1.fila(), t1.columna(), n1, null, null); :};
+
+CABECERAP ::= 
+		PROC:t1 IDFP:t2 PARENTESISAPERTURA:t3 TARGS:n PARENTESISCIERRE:t4 PUNTOCOMA:t5 {: RESULT = new NodoCabecera(t2.lexema(), t2.fila(), t2.columna(), null, null, n); :}
+		| PROC:t1 IDFP:t2 PARENTESISAPERTURA:t3 PARENTESISCIERRE:t4 PUNTOCOMA:t5 {: RESULT = new NodoCabecera(t2.lexema(), t2.fila(), t2.columna(), null, null, null); :};
+
+TIPO ::= 
+		BOOL:t {: RESULT = "bool"; :}
+		| CHAR:t {: RESULT = "char"; :}
+		| INT:t {: RESULT = "int"; :}
+		| REAL:t {: RESULT = "float"; :};
+		
+TARGS ::= 
+		TIPO:n {: RESULT = new NodoInsertaTipoArg(n, null); :}
+		| TIPO:n1 DECDIMS:n2 {: RESULT = new NodoInsertaTipoArg(n1, n2); :}
+		| TIPO:n1 COMA:t TARGS:n2 {: RESULT = new NodoInsertaTipoArg(n1, null, n2); :}
+		| TIPO:n1 DECDIMS:n2 COMA:t TARGS:n3 {: RESULT = new NodoInsertaTipoArg(n1, n2, n3); :};
+
+BDEFINE ::= 
+		DEFINE:t1 IMPLEMENTACIONES:n {: RESULT = new NodoDefine(n); :}
+		| DEFINE:t1 {: RESULT = new NodoDefine(null); :};
+		
+IMPLEMENTACIONES ::= 
+		IMPLEMENTA:n1 IMPLEMENTACIONES:n2 {: n1.setSiguiente(n2); RESULT = n1; :}
+		| IMPLEMENTA:n {: RESULT = n; :};
+		
+IMPLEMENTA ::= 
+		IMPLEMENTAF:n {: RESULT = n; :}
+		| IMPLEMENTAP:n {: RESULT = n; :};
+		
+IMPLEMENTAF ::= 
+		IDFP:t1 PARENTESISAPERTURA:t2 ARGS:n1 PARENTESISCIERRE:t3 BLOQUER:n2 {: RESULT = new NodoImplementacionF(t1.lexema(), t1.fila(), t1.columna(), n2, n1); :}
+		| IDFP:t1 PARENTESISAPERTURA:t2 PARENTESISCIERRE:t3 BLOQUER:n2 {: RESULT = new NodoImplementacionF(t1.lexema(), t1.fila(), t1.columna(), n2, null); :};
+
+ARGS ::= 
+		ID:t {: RESULT = new NodoInsertaNombreArg(t.lexema(), null); :}
+		| ID:t1 COMA:t2 ARGS:n {: RESULT = new NodoInsertaNombreArg(t1.lexema(), n); :};
+
+BRETURN ::= RETURN:t1 EXP:n PUNTOCOMA:t2 {: RESULT = new NodoReturn(t1.fila(), t1.columna(), n); :};
+
+IMPLEMENTAP ::= 
+		IDFP:t1 PARENTESISAPERTURA:t2 ARGS:n1 PARENTESISCIERRE:t3 BLOQUEI:n2 {: RESULT = new NodoImplementacionP(t1.lexema(), t1.fila(), t1.columna(), n2, n1); :}
+		| IDFP:t1 PARENTESISAPERTURA:t2 PARENTESISCIERRE:t3 BLOQUEI:n2 {: RESULT = new NodoImplementacionP(t1.lexema(), t1.fila(), t1.columna(), n2, null); :};
+
+BMAIN ::= START:t1 INSTRUCCIONES:n END:t3 {: RESULT = new NodoBloque(n, true); :}
+		| START:t1 END:t3 {: RESULT = new NodoBloque(null, true); :};
+
+EXP ::= 
+		E1:n1 OP0:n2 EXP:n3 {: n2.setExpresion1(n3); n2.setExpresion2(n1); RESULT = n2; :}
+		| E1:n {: RESULT = n; :};
+
+E1 ::= 
+		E2:n1 OP1:n2 E1:n3 {: n2.setExpresion1(n3); n2.setExpresion2(n1); RESULT = n2; :}
+		| E2:n {: RESULT = n; :};
+
+E2 ::= 
+		E3:n1 OP2:n2 E2:n3 {: n2.setExpresion1(n3); n2.setExpresion2(n1); RESULT = n2; :}
+		| E3:n {: RESULT = n; :};
+
+E3 ::= 
+		E4:n1 OP3:n2 E3:n3 {: n2.setExpresion1(n3); n2.setExpresion2(n1); RESULT = n2; :}
+		| E4:n {: RESULT = n; :};
+
+E4 ::= 
+		OP4:n1 E4:n2 {: n1.setExpresion(n2); RESULT = n1; :}
+		| E5:n {: RESULT = n; :};
+
+E5 ::= 
+		IDVAR:n {: RESULT = n; :}
+		| IDFP:t1 PARENTESISAPERTURA:t2 ARGSLLAMADA:n PARENTESISCIERRE:t3 {: RESULT = new NodoLlamadaF(t1.fila(), t1.columna(), t1.lexema(), n); :}
+		| IDFP:t1 PARENTESISAPERTURA:t2 PARENTESISCIERRE:t3 {: RESULT = new NodoLlamadaF(t1.fila(), t1.columna(), t1.lexema(), null); :}
+		| ELEM:n {: RESULT = n; :}
+		| PARENTESISAPERTURA:t1 EXP:n PARENTESISCIERRE:t2 {: RESULT = new NodoParentesis(t1.fila(), t1.columna(), n); :};
+
+OP0 ::= 
+		EQ:t {: RESULT = new NodoEQ("==", t.fila(), t.columna()); :}
+		| NEQ:t {: RESULT = new NodoNEQ("!=", t.fila(), t.columna()); :}
+		| LET:t {: RESULT = new NodoLET("<=", t.fila(), t.columna()); :}
+		| GET:t {: RESULT = new NodoGET(">=", t.fila(), t.columna()); :}
+		| LT:t {: RESULT = new NodoLT("<", t.fila(), t.columna()); :}
+		| GT:t {: RESULT = new NodoGT(">", t.fila(), t.columna()); :};
+
+OP1 ::= 
+		MAS:t {: RESULT = new NodoMas("+", t.fila(), t.columna()); :}
+		| MENOS:t {: RESULT = new NodoMenos("-", t.fila(), t.columna()); :}
+		| OR:t {: RESULT = new NodoOr("||", t.fila(), t.columna()); :};
+
+OP2 ::= 
+		POR:t {: RESULT = new NodoPor("*", t.fila(), t.columna()); :}
+		| DIV:t {: RESULT = new NodoDiv("/", t.fila(), t.columna()); :}
+		| MOD:t {: RESULT = new NodoMod("%", t.fila(), t.columna()); :}
+		| AND:t {: RESULT = new NodoAnd("&&", t.fila(), t.columna()); :};
+
+OP3 ::= POW:t {: RESULT = new NodoPow("^", t.fila(), t.columna()); :};
+
+OP4 ::= 
+		MENOS:t {: RESULT = new NodoMenosUnario("-", t.fila(), t.columna()); :}
+		| NOT:t {: RESULT = new NodoNot("~", t.fila(), t.columna()); :};
+
+ELEM ::= 
+		INTELEMENT:t {: RESULT = new NodoInt("int", Integer.parseInt(t.lexema())); :}
+		| REALELEMENT:t {: RESULT = new NodoReal("float", Float.parseFloat(t.lexema())); :}
+		| BOOLELEMENT:t {: RESULT = new NodoBool("bool", Boolean.parseBoolean(t.lexema())); :}
+		| CHARELEMENT:t {: RESULT = new NodoChar("char", t.lexema().charAt(1)); :};
+
+IDVAR ::= 
+		ID:t {: RESULT = new NodoVaruse(t.fila(), t.columna(), t.lexema()); :}
+		| ID:t DIMS:n {: n.setIdVar(new NodoVaruse(t.fila(), t.columna(), t.lexema())); RESULT = n; :};
+
+ARGSLLAMADA ::= 
+		EXP:n {: RESULT = new NodoArgumento(n.getFila(), n.getColumna(), n, null); :}
+		| EXP:n1 COMA:t ARGSLLAMADA:n2 {: RESULT = new NodoArgumento(n1.getFila(), n1.getColumna(), n1, n2); :};
+
+DECVAR ::= TVAR:n {:  RESULT = n; :};
+
+TVAR ::= 
+		TIPO:n ID:t1 PUNTOCOMA:t2 {: RESULT = new NodoDecTVar(t1.lexema(), t1.fila(), t1.columna(), n, null); :}
+		| TIPO:n1 DECDIMS:n2 ID:t1 PUNTOCOMA:t2 {: RESULT = new NodoDecTVar(t1.lexema(), t1.fila(), t1.columna(), n1, n2); :};
+
+DECDIMS ::= 
+		DECDIM:n1 DECDIMS:n2 {: n1.setSiguiente(n2); RESULT = n1; :}
+		| DECDIM:n {: RESULT = n; :};
+
+DECDIM ::= CORCHETEAPERTURA:t1 INTELEMENT:t2 CORCHETECIERRE:t3 {: RESULT = new NodoDecDim(Integer.parseInt(t2.lexema())); :};
+
+DIMS ::= 
+		DIM:n1 DIMS:n2 {: n2.setIdVar(n1); RESULT = n2; :}
+		| DIM:n {: RESULT = n; :};
+
+DIM ::= CORCHETEAPERTURA:t1 EXP:n CORCHETECIERRE:t2 {: RESULT = new NodoDim(t1.fila(), t1.columna(), n); :};
+
+ASIG ::= IDVAR:n1 IGUAL:t1 EXP:n2 PUNTOCOMA:t2 {: RESULT = new NodoAsignacion(t1.fila(), t1.columna(), n1, n2); :};
+
+BIF ::= IF:t1 PARENTESISAPERTURA:t2 EXP:n1 PARENTESISCIERRE:t3 BLOQUEI:n2 {: RESULT = new NodoIf(t1.fila(), t1.columna(), n1, n2); :};
+
+BIFELSE ::= BIF:n1 ELSE:t BLOQUEI:n2 {: RESULT = new NodoIfElse(n1.getFila(), n1.getColumna(), n1.getExpresion(), n1.getBloque(), n2); :};
+
+BWHILE ::= WHILE:t1 PARENTESISAPERTURA:t2 EXP:n1 PARENTESISCIERRE:t3 BLOQUEI:n2 {: RESULT = new NodoWhile(t1.fila(), t1.columna(), n1, n2); :};
+
+BSWITCH ::= 
+		SWITCH:t1 PARENTESISAPERTURA:t2 EXP:n1 PARENTESISCIERRE:t3 CASES:n2 DEFAULT:t4 DOSPUNTOS:t5 BLOQUEI:n3 {: RESULT = new NodoSwitch(t1.fila(), t1.columna(), n1, n2, new NodoDefault(t4.fila(), t4.columna(), n3)); :}
+		| SWITCH:t1 PARENTESISAPERTURA:t2 EXP:n1 PARENTESISCIERRE:t3 DEFAULT:t4 DOSPUNTOS:t5 BLOQUEI:n2 {: RESULT = new NodoSwitch(t1.fila(), t1.columna(), n1, null, new NodoDefault(t4.fila(), t4.columna(), n2)); :};
+
+CASES ::= 
+		CASE:t1 INTELEMENT:t2 DOSPUNTOS:t3 BLOQUEI:n1 CASES:n2 {: RESULT = new NodoCase(t1.fila(), t1.columna(), Integer.parseInt(t2.lexema()), n1, n2); :}
+		| CASE:t1 INTELEMENT:t2 DOSPUNTOS:t3 BLOQUEI:n {: RESULT = new NodoCase(t1.fila(), t1.columna(), Integer.parseInt(t2.lexema()), n); :};
+
+LLPROC ::= 
+		IDFP:t1 PARENTESISAPERTURA:t2 ARGSLLAMADA:n PARENTESISCIERRE:t3 PUNTOCOMA:t4 {: RESULT = new NodoLlamadaP(t1.fila(), t1.columna(), t1.lexema(), n); :}
+		| IDFP:t1 PARENTESISAPERTURA:t2 PARENTESISCIERRE:t3 PUNTOCOMA:t4 {: RESULT = new NodoLlamadaP(t1.fila(), t1.columna(), t1.lexema(), null); :};
